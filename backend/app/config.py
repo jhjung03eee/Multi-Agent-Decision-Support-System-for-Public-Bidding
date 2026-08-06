@@ -38,7 +38,7 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
 
     corpus_dir: str = ""
-    screening_concurrency: int = 4
+    screening_concurrency: int = 8
 
     # Screening reference date. Empty means "derive from the corpus" — see
     # BatchScreener.resolve_as_of. Set BIDCOM_AS_OF=YYYY-MM-DD to pin it, or

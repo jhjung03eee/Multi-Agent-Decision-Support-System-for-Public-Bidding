@@ -117,7 +117,13 @@ class BatchScreener:
 
         try:
             async with self._semaphore:
-                result = await self._supervisor.run(record.markdown, record.bid_id, company)
+                # Skip the chair's LLM narrative pass in batch mode: it's a second
+                # sequential LLM round-trip per bid that batch reports don't render,
+                # and cutting it roughly halves per-bid latency against the
+                # serverless function's hard wall-clock budget.
+                result = await self._supervisor.run(
+                    record.markdown, record.bid_id, company, narrative=False
+                )
         except Exception as exc:
             logger.exception("committee failed for %s", record.bid_id)
             return ScreeningItem(

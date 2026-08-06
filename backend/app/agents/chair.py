@@ -37,7 +37,9 @@ class CommitteeChair:
         self._llm = llm
         self._settings = settings
 
-    async def decide(self, opinions: list[AgentOpinion], facts: BidFacts) -> CommitteeResult:
+    async def decide(
+        self, opinions: list[AgentOpinion], facts: BidFacts, narrative: bool = True
+    ) -> CommitteeResult:
         votes = [self._to_vote(opinion) for opinion in opinions]
         total_weight = sum(vote.weight for vote in votes) or 1.0
         committee_score = sum(vote.weighted_score for vote in votes) / total_weight
@@ -50,7 +52,11 @@ class CommitteeChair:
         confidence = self._committee_confidence(opinions, committee_score)
         human_reasons = self._human_review_reasons(opinions, confidence, decision)
 
-        narrative = await self._narrative(opinions, facts, decision, committee_score, veto_reason)
+        narrative_text = (
+            await self._narrative(opinions, facts, decision, committee_score, veto_reason)
+            if narrative
+            else _fallback_narrative(opinions, decision, committee_score, veto_reason)
+        )
 
         return CommitteeResult(
             decision=decision,
@@ -58,10 +64,10 @@ class CommitteeChair:
             committee_score=round(committee_score, 3),
             priority=_priority(committee_score, decision),
             votes=votes,
-            executive_summary=narrative["executive_summary"],
-            key_strengths=narrative["key_strengths"],
-            key_risks=narrative["key_risks"],
-            conditions=narrative["conditions"],
+            executive_summary=narrative_text["executive_summary"],
+            key_strengths=narrative_text["key_strengths"],
+            key_risks=narrative_text["key_risks"],
+            conditions=narrative_text["conditions"],
             dissenting_roles=_dissenters(opinions, decision),
             human_review_required=bool(human_reasons),
             human_review_reasons=human_reasons,

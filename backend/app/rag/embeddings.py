@@ -56,22 +56,34 @@ class HashingEmbeddings:
 
 
 class OpenAIEmbeddings:
+    # Shared across instances/requests within one process: once this provider's
+    # endpoint proves unavailable, stop paying the round-trip on every chunk.
+    _unavailable_base_urls: set[str] = set()
+
     def __init__(self, settings: Settings) -> None:
         self._settings = settings
         self._fallback = HashingEmbeddings()
         self.name = f"openai:{settings.openai_embedding_model}"
 
     async def embed(self, texts: list[str]) -> np.ndarray:
+        base_url = self._settings.openai_base_url
+        if base_url in self._unavailable_base_urls:
+            return await self._fallback.embed(texts)
         try:
             async with httpx.AsyncClient(timeout=self._settings.llm_timeout_seconds) as client:
                 response = await client.post(
-                    f"{self._settings.openai_base_url.rstrip('/')}/embeddings",
+                    f"{base_url.rstrip('/')}/embeddings",
                     json={"model": self._settings.openai_embedding_model, "input": texts},
                     headers={"Authorization": f"Bearer {self._settings.openai_api_key}"},
                 )
                 response.raise_for_status()
                 vectors = [item["embedding"] for item in response.json()["data"]]
             return _normalize(np.array(vectors, dtype=np.float32))
+        except httpx.HTTPStatusError as exc:
+            logger.exception("OpenAI embedding call failed; using offline embeddings")
+            if exc.response.status_code in (404, 501):
+                self._unavailable_base_urls.add(base_url)
+            return await self._fallback.embed(texts)
         except Exception:
             logger.exception("OpenAI embedding call failed; using offline embeddings")
             return await self._fallback.embed(texts)

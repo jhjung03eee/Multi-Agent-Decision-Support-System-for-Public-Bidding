@@ -33,10 +33,14 @@ class Supervisor:
         self._chair = CommitteeChair(self._llm, self._settings)
 
     async def run(
-        self, markdown: str, document_name: str, company: CompanyProfile | None = None
+        self,
+        markdown: str,
+        document_name: str,
+        company: CompanyProfile | None = None,
+        narrative: bool = True,
     ) -> ReviewResult:
         result: ReviewResult | None = None
-        async for event in self.stream(markdown, document_name, company):
+        async for event in self.stream(markdown, document_name, company, narrative=narrative):
             if event.stage == "completed":
                 result = ReviewResult(**event.payload)
         if result is None:
@@ -44,7 +48,11 @@ class Supervisor:
         return result
 
     async def stream(
-        self, markdown: str, document_name: str, company: CompanyProfile | None = None
+        self,
+        markdown: str,
+        document_name: str,
+        company: CompanyProfile | None = None,
+        narrative: bool = True,
     ) -> AsyncIterator[WorkflowEvent]:
         started = time.perf_counter()
         company = company or load_company_profile()
@@ -92,7 +100,7 @@ class Supervisor:
         opinions.sort(key=lambda o: order[o.role])
 
         yield WorkflowEvent(stage="committee_started", message="위원회 가중 투표 진행")
-        committee = await self._chair.decide(opinions, facts)
+        committee = await self._chair.decide(opinions, facts, narrative=narrative)
         yield WorkflowEvent(
             stage="committee_completed",
             message=f"위원장 최종 판정: {committee.decision.value}",
