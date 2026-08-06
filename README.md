@@ -229,7 +229,7 @@ projects/raw/
 
 ```bash
 OPENAI_API_KEY=...                 # 비우면 오프라인 모드
-OPENAI_MODEL=gpt-5-nano
+OPENAI_MODEL=gpt-5.6-luna
 OPENAI_EMBEDDING_MODEL=text-embedding-3-small
 BIDCOM_CONFIDENCE_THRESHOLD=0.65
 BIDCOM_AS_OF=                      # 비우면 코퍼스에서 기준일 유도

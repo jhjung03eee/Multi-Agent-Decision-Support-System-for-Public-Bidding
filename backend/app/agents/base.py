@@ -61,11 +61,11 @@ class DomainAgent:
             f"[{chunk.chunk_id}] (section: {chunk.section})\n{chunk.text}" for chunk in retrieved
         )
         return (
-            "## COMPANY PROFILE\n"
+            "## COMPANY PROFILE (참고용 컨텍스트 — chunk_id로 인용 금지)\n"
             f"{json.dumps(company.model_dump(), ensure_ascii=False, indent=2)}\n\n"
-            "## BID FACTS\n"
+            "## BID FACTS (참고용 컨텍스트 — chunk_id로 인용 금지)\n"
             f"{json.dumps(facts.model_dump(), ensure_ascii=False, indent=2)}\n\n"
-            "## EVIDENCE\n"
+            "## EVIDENCE (citations의 chunk_id는 여기 [cXXX] 값만 사용 가능)\n"
             f"{evidence or '(관련 발췌문 없음)'}\n\n"
             f"위 근거만으로 {self.profile.display_name}의 관점에서 판단하고 JSON으로 답하라."
         )
