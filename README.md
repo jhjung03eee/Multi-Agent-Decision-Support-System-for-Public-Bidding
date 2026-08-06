@@ -10,7 +10,7 @@
 문서를 요약하는 것이 목적이 아니라, 실제 기업의 Go/No-Go Committee 업무 프로세스를
 AI 워크플로우로 구현하는 것이 목적이다.
 
-**데모**: [[https://multi-agent-decision-support-system.vercel.app](https://1fjstwfyh-beboxv8c9-jhjung03-5711s-projects.vercel.app/)](https://1fjstwfyh-beboxv8c9-jhjung03-5711s-projects.vercel.app/)
+**데모**: https://multi-agent-decision-support-system.vercel.app
 
 나라장터 형식 공고 20건과 KIA 주식회사 프로필이 함께 배포되어 있어, 별도 준비 없이
 `일괄 스크리닝 실행`으로 전체 파이프라인을 볼 수 있다.
