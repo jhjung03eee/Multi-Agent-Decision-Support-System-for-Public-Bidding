@@ -193,9 +193,9 @@ def _top(value: object, fallback: list[str], limit: int = 5) -> list[str]:
 
 
 def _score_to_decision(score: float) -> Decision:
-    if score >= 0.7:
+    if score >= 0.6:
         return Decision.GO
-    if score >= 0.45:
+    if score >= 0.4:
         return Decision.REVIEW
     return Decision.NO_GO
 
