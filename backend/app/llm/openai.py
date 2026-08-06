@@ -34,6 +34,13 @@ class OpenAIClient:
                     json=payload,
                     headers=headers,
                 )
+                if response.status_code == 400 and _rejects_temperature(response):
+                    payload.pop("temperature", None)
+                    response = await client.post(
+                        f"{self._settings.openai_base_url.rstrip('/')}/chat/completions",
+                        json=payload,
+                        headers=headers,
+                    )
                 response.raise_for_status()
                 content = response.json()["choices"][0]["message"]["content"]
             return parse_json_object(content)
@@ -42,3 +49,11 @@ class OpenAIClient:
             result = fallback()
             result["degraded"] = True
             return result
+
+
+def _rejects_temperature(response: httpx.Response) -> bool:
+    """Some models (e.g. reasoning-tier) only accept the default temperature."""
+    try:
+        return response.json().get("error", {}).get("param") == "temperature"
+    except Exception:
+        return False
