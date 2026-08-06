@@ -3,7 +3,7 @@
   "buildCommand": "cd frontend && npm ci && npm run build",
   "functions": {
     "api/index.py": {
-      "includeFiles": "{backend/app/**,data/**,projects/raw/**,frontend/dist/**}",
+      "includeFiles": "{backend/app/**,projects/raw/**,frontend/dist/**}",
       "maxDuration": 60
     }
   }
