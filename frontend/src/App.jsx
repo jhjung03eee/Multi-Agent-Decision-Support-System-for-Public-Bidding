@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import CompanyProfile from "./components/CompanyProfile";
 import ReviewView from "./components/ReviewView";
 import ScreeningView from "./components/ScreeningView";
 import { getConfig, getCorpus, getHealth, getSamples, runScreening, streamReview } from "./lib/api";
@@ -37,6 +38,7 @@ export default function App() {
   const [run, setRun] = useState(initialRun);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [showProfile, setShowProfile] = useState(false);
   const abortRef = useRef(null);
 
   useEffect(() => {
@@ -134,9 +136,14 @@ export default function App() {
           </div>
           <div className="flex flex-wrap items-center gap-2 text-sm">
             {config && (
-              <span className="rounded-md border border-slate-700 bg-slate-900/70 px-3 py-1.5 text-slate-400">
+              <button
+                onClick={() => setShowProfile(true)}
+                title="자사 프로필 상세 보기 — 심의 기준이 되는 역량·자격·임계값"
+                className="rounded-md border border-slate-700 bg-slate-900/70 px-3 py-1.5 text-slate-400 transition-colors hover:border-sky-500/50 hover:text-slate-200 print:hidden"
+              >
                 심의 대상 <strong className="ml-1 font-medium text-slate-100">{config.company.name}</strong>
-              </span>
+                <span aria-hidden className="ml-1.5 text-slate-500">ⓘ</span>
+              </button>
             )}
             {health && (
               <span
@@ -200,6 +207,10 @@ export default function App() {
       <footer className="pt-2 pb-6 text-center text-xs text-slate-600 print:hidden">
         Project 08 · Multi-Agent Decision Support System for Public Bidding
       </footer>
+
+      {showProfile && (
+        <CompanyProfile company={config?.company} onClose={() => setShowProfile(false)} />
+      )}
     </div>
   );
 }
