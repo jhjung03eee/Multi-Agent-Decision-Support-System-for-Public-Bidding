@@ -15,6 +15,7 @@ from app.schemas import (
     Citation,
     CompanyProfile,
     Decision,
+    EvidenceItem,
     RetrievedChunk,
 )
 
@@ -79,8 +80,8 @@ class DomainAgent:
             decision=_coerce_decision(raw.get("decision")),
             confidence=_clamp(raw.get("confidence")),
             summary=str(raw.get("summary", "")).strip() or "판단 요약이 생성되지 않았습니다.",
-            strengths=_string_list(raw.get("strengths")),
-            risks=_string_list(raw.get("risks")),
+            strengths=_evidence_items(raw.get("strengths")),
+            risks=_evidence_items(raw.get("risks")),
             citations=_citations(raw.get("citations")),
             criteria_scores=_scores(raw.get("criteria_scores"), self.profile.criteria),
             guardrail_flags=flags,
@@ -115,6 +116,22 @@ def _string_list(value: object) -> list[str]:
     if not isinstance(value, list):
         return []
     return [str(item).strip() for item in value if str(item).strip()][:6]
+
+
+def _evidence_items(value: object) -> list[EvidenceItem]:
+    if not isinstance(value, list):
+        return []
+    items: list[EvidenceItem] = []
+    for item in value:
+        if isinstance(item, dict):
+            text = str(item.get("text", "")).strip()
+            grounded = bool(item.get("grounded", False))
+        else:
+            text = str(item).strip()
+            grounded = False
+        if text:
+            items.append(EvidenceItem(text=text, grounded=grounded))
+    return items[:6]
 
 
 def _citations(value: object) -> list[Citation]:

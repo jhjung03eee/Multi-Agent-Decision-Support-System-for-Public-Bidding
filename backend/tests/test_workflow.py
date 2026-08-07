@@ -110,7 +110,7 @@ async def test_low_value_maintenance_case_is_not_go():
 
     finance = next(o for o in result.opinions if o.role is AgentRole.FINANCE)
     assert finance.decision is Decision.NO_GO
-    assert any("최소 수주 기준" in risk for risk in finance.risks)
+    assert any("최소 수주 기준" in risk.text for risk in finance.risks)
     assert result.committee.decision is not Decision.GO
 
 

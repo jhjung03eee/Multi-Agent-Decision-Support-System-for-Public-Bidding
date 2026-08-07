@@ -138,8 +138,8 @@ class CommitteeChair:
                 "decision": o.decision.value,
                 "confidence": o.confidence,
                 "summary": o.summary,
-                "strengths": o.strengths,
-                "risks": o.risks,
+                "strengths": [s.text for s in o.strengths],
+                "risks": [r.text for r in o.risks],
             }
             for o in opinions
         ]
@@ -156,8 +156,10 @@ class CommitteeChair:
         return {
             "executive_summary": str(raw.get("executive_summary", "")).strip()
             or _fallback_narrative(opinions, decision, score, veto_reason)["executive_summary"],
-            "key_strengths": _top(raw.get("key_strengths"), [s for o in opinions for s in o.strengths]),
-            "key_risks": _top(raw.get("key_risks"), [r for o in opinions for r in o.risks]),
+            "key_strengths": _top(
+                raw.get("key_strengths"), [s.text for o in opinions for s in o.strengths]
+            ),
+            "key_risks": _top(raw.get("key_risks"), [r.text for o in opinions for r in o.risks]),
             "conditions": _top(raw.get("conditions"), []),
         }
 
@@ -175,11 +177,13 @@ def _fallback_narrative(
     if veto_reason:
         summary += f" 법무 위원의 거부권이 발동되었다: {veto_reason}"
 
-    conditions = [f"{o.display_name} 지적사항 해소: {o.risks[0]}" for o in opinions if o.risks][:4]
+    conditions = [
+        f"{o.display_name} 지적사항 해소: {o.risks[0].text}" for o in opinions if o.risks
+    ][:4]
     return {
         "executive_summary": summary,
-        "key_strengths": [s for o in opinions for s in o.strengths][:5],
-        "key_risks": [r for o in opinions for r in o.risks][:5],
+        "key_strengths": [s.text for o in opinions for s in o.strengths][:5],
+        "key_risks": [r.text for o in opinions for r in o.risks][:5],
         "conditions": conditions,
     }
 

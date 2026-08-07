@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 class Decision(str, Enum):
@@ -51,6 +51,26 @@ class RetrievedChunk(BaseModel):
     score: float
 
 
+class EvidenceItem(BaseModel):
+    """A strength/risk claim, tagged with whether it's backed by real EVIDENCE.
+
+    `grounded=False` means the claim rests only on COMPANY PROFILE / BID FACTS
+    context (generic company capability, not something confirmed by the
+    announcement's own text) — the UI must not render it as if it were an
+    evidence-backed finding.
+    """
+
+    text: str
+    grounded: bool = False
+
+    @model_validator(mode="before")
+    @classmethod
+    def _coerce_plain_string(cls, data: object) -> object:
+        if isinstance(data, str):
+            return {"text": data, "grounded": False}
+        return data
+
+
 class AgentOpinion(BaseModel):
     role: AgentRole
     display_name: str
@@ -58,8 +78,8 @@ class AgentOpinion(BaseModel):
     decision: Decision
     confidence: float = Field(ge=0.0, le=1.0)
     summary: str
-    strengths: list[str] = Field(default_factory=list)
-    risks: list[str] = Field(default_factory=list)
+    strengths: list[EvidenceItem] = Field(default_factory=list)
+    risks: list[EvidenceItem] = Field(default_factory=list)
     citations: list[Citation] = Field(default_factory=list)
     criteria_scores: dict[str, float] = Field(default_factory=dict)
     guardrail_flags: list[str] = Field(default_factory=list)

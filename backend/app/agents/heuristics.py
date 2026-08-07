@@ -148,8 +148,8 @@ def sales_opinion(
             f"보유 역량 {len(matched_tech)}건이 공고와 일치하고, 예산 규모 "
             f"{_krw(facts.budget_krw)} 기준으로 사업 가치를 평가했다."
         ),
-        "strengths": strengths,
-        "risks": risks,
+        "strengths": [{"text": s, "grounded": True} for s in strengths],
+        "risks": [{"text": r, "grounded": True} for r in risks],
         "criteria_scores": scores,
         "citations": _citations(retrieved),
     }
@@ -212,8 +212,8 @@ def technical_opinion(
             f"요구 기술과 겹치는 보유 스택 {len(matched)}건, 사업기간 "
             f"{facts.duration or '미확인'} 조건에서 수행 가능성을 평가했다."
         ),
-        "strengths": strengths,
-        "risks": risks,
+        "strengths": [{"text": s, "grounded": True} for s in strengths],
+        "risks": [{"text": r, "grounded": True} for r in risks],
         "criteria_scores": scores,
         "citations": _citations(retrieved),
     }
@@ -293,8 +293,8 @@ def finance_opinion(
         "summary": (
             f"예산 {_krw(facts.budget_krw)}, 예상 마진 {margin:.0%} 기준으로 수익성을 평가했다."
         ),
-        "strengths": strengths,
-        "risks": risks,
+        "strengths": [{"text": s, "grounded": True} for s in strengths],
+        "risks": [{"text": r, "grounded": True} for r in risks],
         "criteria_scores": scores,
         "citations": _citations(retrieved),
     }
@@ -364,8 +364,8 @@ def legal_opinion(
             f"자격요건 {len(satisfied)}/{len(cert_lines)}건 충족 확인, "
             f"계약 위험 조항 {len(found_clauses)}건을 식별했다."
         ),
-        "strengths": strengths,
-        "risks": risks,
+        "strengths": [{"text": s, "grounded": True} for s in strengths],
+        "risks": [{"text": r, "grounded": True} for r in risks],
         "criteria_scores": scores,
         "citations": _citations(retrieved),
     }

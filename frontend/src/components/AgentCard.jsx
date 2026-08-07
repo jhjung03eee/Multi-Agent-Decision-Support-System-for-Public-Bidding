@@ -111,9 +111,21 @@ export default function AgentCard({ profile, opinion, status }) {
             {opinion.strengths?.length > 0 && (
               <ul className="space-y-1">
                 {opinion.strengths.map((item, i) => (
-                  <li key={i} className="flex gap-1.5 text-[13px] text-emerald-300/90">
+                  <li
+                    key={i}
+                    className={`flex gap-1.5 text-[13px] ${
+                      item.grounded ? "text-emerald-300/90" : "text-slate-400"
+                    }`}
+                  >
                     <span>+</span>
-                    <span>{item}</span>
+                    <span>
+                      {item.text}
+                      {!item.grounded && (
+                        <span className="ml-1.5 rounded bg-slate-800 px-1 py-0.5 text-[11px] text-slate-500">
+                          회사 프로필 기반 · 공고 근거 아님
+                        </span>
+                      )}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -122,9 +134,21 @@ export default function AgentCard({ profile, opinion, status }) {
             {opinion.risks?.length > 0 && (
               <ul className="space-y-1">
                 {opinion.risks.map((item, i) => (
-                  <li key={i} className="flex gap-1.5 text-[13px] text-rose-300/90">
+                  <li
+                    key={i}
+                    className={`flex gap-1.5 text-[13px] ${
+                      item.grounded ? "text-rose-300/90" : "text-slate-400"
+                    }`}
+                  >
                     <span>!</span>
-                    <span>{item}</span>
+                    <span>
+                      {item.text}
+                      {!item.grounded && (
+                        <span className="ml-1.5 rounded bg-slate-800 px-1 py-0.5 text-[11px] text-slate-500">
+                          회사 프로필 기반 · 공고 근거 아님
+                        </span>
+                      )}
+                    </span>
                   </li>
                 ))}
               </ul>

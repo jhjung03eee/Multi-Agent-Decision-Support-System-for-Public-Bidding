@@ -38,7 +38,8 @@ class AgentProfile:
             "1. 제공된 발췌문(EVIDENCE)에 근거하지 않은 주장은 하지 마라.\n"
             "2. citations의 chunk_id는 반드시 EVIDENCE에 [cXXX] 형태로 나열된 값만 사용하라.\n"
             "   COMPANY PROFILE과 BID FACTS는 대조용 참고 정보일 뿐 인용 대상이 아니다 — "
-            "   그 정보에만 근거한 주장은 citations 없이 strengths/risks에만 적어라.\n"
+            "   그 정보에만 근거한 주장은 citations 없이 strengths/risks에 적되 grounded를 "
+            "false로 표시하라. EVIDENCE의 citations로 뒷받침되는 주장만 grounded를 true로 표시하라.\n"
             "   EVIDENCE에 근거가 없으면 REVIEW로 판단하라.\n"
             "3. 회사 프로필과 공고 내용을 대조하여 판단하라.\n"
             "4. 확신이 없으면 confidence를 낮춰라. 과신하지 마라.\n"
@@ -56,8 +57,8 @@ class AgentProfile:
             '  "decision": "GO" | "REVIEW" | "NO-GO",\n'
             '  "confidence": 0.0~1.0,\n'
             '  "summary": "2~3문장 판단 요약",\n'
-            '  "strengths": ["..."],\n'
-            '  "risks": ["..."],\n'
+            '  "strengths": [{"text": "...", "grounded": true|false}],\n'
+            '  "risks": [{"text": "...", "grounded": true|false}],\n'
             '  "criteria_scores": {"기준명": 0.0~1.0},\n'
             '  "citations": [{"chunk_id": "c001", "section": "...", "quote": "원문 인용"}]\n'
             "}"
