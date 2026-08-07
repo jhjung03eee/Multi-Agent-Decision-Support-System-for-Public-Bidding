@@ -66,6 +66,10 @@ export default function App() {
   };
 
   const handleEvent = (event) => {
+    if (event.stage === "error") {
+      setError(event.message);
+      return;
+    }
     setRun((prev) => {
       const next = {
         ...prev,

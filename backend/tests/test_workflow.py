@@ -135,6 +135,26 @@ async def test_stream_emits_stages_in_order():
     assert stages.index("committee_completed") > stages.index("agent_completed")
 
 
+async def test_non_bid_document_is_rejected_before_any_agent_runs():
+    stages = [
+        event.stage
+        async for event in Supervisor(SETTINGS).stream(
+            "안녕하세요 저는 정동진입니다.", "greeting.md"
+        )
+    ]
+    assert stages == ["parsing", "error"]
+
+    with pytest.raises(ValueError):
+        await Supervisor(SETTINGS).run("안녕하세요 저는 정동진입니다.", "greeting.md")
+
+
+def test_review_endpoint_rejects_non_bid_document(client):
+    response = client.post(
+        "/api/review", json={"document_text": "안녕하세요 저는 정동진입니다.", "document_name": "greeting.md"}
+    )
+    assert response.status_code == 422
+
+
 def test_health_and_config_endpoints(client):
     assert client.get("/api/health").json()["status"] == "ok"
     config = client.get("/api/config").json()

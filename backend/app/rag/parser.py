@@ -22,6 +22,24 @@ _LABELS = {
     "region": ("사업지역", "이행지역", "지역제한", "소재지", "지역"),
 }
 
+BID_SIGNAL_KEYWORDS = (
+    "입찰",
+    "공고",
+    "용역",
+    "사업",
+    "발주",
+    "계약",
+    "제안서",
+    "낙찰",
+    "과업",
+    "구축",
+    "제출",
+    "심사",
+    "평가",
+    "예산",
+    "나라장터",
+)
+
 
 def to_markdown(raw: bytes | str, filename: str) -> str:
     """Normalize an uploaded notice into markdown with `##` section headings."""
@@ -105,6 +123,24 @@ def extract_facts(markdown: str) -> BidFacts:
     facts.qualifications = _section_items(markdown, ("자격", "참가자격", "입찰참가", "제한사항"))
     facts.evaluation_criteria = _section_items(markdown, ("평가", "심사", "배점", "낙찰자 결정"))
     return facts
+
+
+def bid_document_issue(markdown: str, facts: BidFacts) -> str | None:
+    """Cheap, deterministic check that the input is actually a bid announcement.
+
+    Runs before any agent so a document with no bid content in it (or a
+    guardrail test) never burns four LLM calls just to report "no evidence
+    found". Returns a user-facing reason when it isn't a bid document,
+    otherwise None.
+    """
+    has_core_fact = any(
+        [facts.agency, facts.budget_krw, facts.deadline, facts.duration, facts.region]
+    )
+    has_requirements = bool(facts.qualifications or facts.evaluation_criteria)
+    has_keyword = any(keyword in markdown for keyword in BID_SIGNAL_KEYWORDS)
+    if has_core_fact or has_requirements or has_keyword:
+        return None
+    return "입력한 문서에서 공고 내용을 확인할 수 없습니다. 실제 입찰 공고문을 첨부해 주세요."
 
 
 def _first_heading(markdown: str) -> str | None:

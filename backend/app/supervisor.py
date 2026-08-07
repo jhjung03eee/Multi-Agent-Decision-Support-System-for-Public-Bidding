@@ -11,7 +11,7 @@ from app.guardrails import citation_stats, grounding_rate
 from app.llm.factory import get_llm_client
 from app.rag.chunker import chunk_markdown
 from app.rag.embeddings import get_embeddings
-from app.rag.parser import extract_facts
+from app.rag.parser import bid_document_issue, extract_facts
 from app.rag.retriever import Retriever
 from app.rag.store import VectorStore
 from app.schemas import (
@@ -40,9 +40,15 @@ class Supervisor:
         narrative: bool = True,
     ) -> ReviewResult:
         result: ReviewResult | None = None
-        async for event in self.stream(markdown, document_name, company, narrative=narrative):
-            if event.stage == "completed":
-                result = ReviewResult(**event.payload)
+        stream = self.stream(markdown, document_name, company, narrative=narrative)
+        try:
+            async for event in stream:
+                if event.stage == "completed":
+                    result = ReviewResult(**event.payload)
+                elif event.stage == "error":
+                    raise ValueError(event.message)
+        finally:
+            await stream.aclose()
         if result is None:
             raise RuntimeError("workflow finished without a result")
         return result
@@ -64,6 +70,15 @@ class Supervisor:
             message="공고문 파싱 및 핵심 정보 추출 완료",
             payload={"facts": facts.model_dump(), "document_id": document_id},
         )
+
+        issue = bid_document_issue(markdown, facts)
+        if issue:
+            yield WorkflowEvent(
+                stage="error",
+                message=issue,
+                payload={"reason": "not_a_bid_document"},
+            )
+            return
 
         chunks = chunk_markdown(markdown, self._settings.chunk_size, self._settings.chunk_overlap)
         store = VectorStore(get_embeddings(self._settings))

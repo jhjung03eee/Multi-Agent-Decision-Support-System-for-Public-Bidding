@@ -90,7 +90,10 @@ async def screen() -> ScreeningReport:
 @router.post("/review", response_model=ReviewResult)
 async def review(request: ReviewRequest) -> ReviewResult:
     markdown, name = _resolve_document(request)
-    return await Supervisor().run(markdown, name)
+    try:
+        return await Supervisor().run(markdown, name)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
 @router.post("/review/stream")
